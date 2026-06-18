@@ -1,1 +1,571 @@
- 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>go-elicit Demo</title>
+    <!-- Modern Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --card-bg: rgba(22, 28, 45, 0.6);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --primary-color: #3b82f6;
+            --primary-hover: #2563eb;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --accent-glow: rgba(59, 130, 246, 0.15);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            background-image: radial-gradient(circle at 50% 0%, var(--accent-glow), transparent 60%);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 680px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 2.5rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        header {
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.25rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #60a5fa, #3b82f6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .section {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #60a5fa;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Forms & Inputs */
+        .input-group {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+        }
+
+        button {
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 500;
+            border-radius: 8px;
+            padding: 0.75rem 1.25rem;
+            border: none;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .btn-danger {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        /* Connection status */
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--danger-color);
+            box-shadow: 0 0 8px var(--danger-color);
+            transition: all 0.3s;
+        }
+
+        .status-dot.connected {
+            background-color: var(--success-color);
+            box-shadow: 0 0 8px var(--success-color);
+        }
+
+        /* Dynamic questions */
+        .question-block {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .question-block:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .question-text {
+            font-weight: 500;
+            margin-bottom: 0.75rem;
+            font-size: 1rem;
+        }
+
+        .option-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 6px;
+            transition: background 0.15s;
+        }
+
+        .option-item:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .option-item input {
+            cursor: pointer;
+        }
+
+        /* Priority list styling */
+        .priority-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .priority-buttons {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .btn-arrow {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            border-radius: 4px;
+        }
+
+        .btn-arrow:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: var(--text-primary);
+        }
+
+        /* Logging Console */
+        .console {
+            background: #040711;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1rem;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            height: 180px;
+            overflow-y: auto;
+            color: #38bdf8;
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.8);
+        }
+
+        .log-line {
+            margin-bottom: 0.25rem;
+            line-height: 1.4;
+        }
+
+        .log-time {
+            color: #64748b;
+        }
+
+        /* Utilities */
+        .hidden {
+            display: none !important;
+        }
+
+        .mt-1 {
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>go-elicit</h1>
+            <div class="subtitle">Human-in-the-loop elicitation framework demo</div>
+        </header>
+
+        <!-- Session Manager Section -->
+        <div class="section">
+            <div class="section-title">
+                <span>Session Connection</span>
+                <div class="status-badge">
+                    <div id="status-dot" class="status-dot"></div>
+                    <span id="status-text">Disconnected</span>
+                </div>
+            </div>
+            <div class="input-group">
+                <input type="text" id="session-id" placeholder="Enter session ID (e.g. session-abc)" value="session-demo">
+                <button id="connect-btn" class="btn-primary" onclick="toggleConnection()">Connect</button>
+            </div>
+        </div>
+
+        <!-- Trigger Agent Section -->
+        <div id="agent-section" class="section hidden">
+            <div class="section-title">Agent Simulator</div>
+            <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem;">
+                Trigger the mock agent in the background. It will issue an elicitation request with three questions to this session.
+            </p>
+            <button id="trigger-btn" class="btn-primary" onclick="triggerAgent()">Trigger Agent</button>
+        </div>
+
+        <!-- Elicitation Request Form -->
+        <div id="form-section" class="section hidden">
+            <div class="section-title">Elicitation Questionnaire</div>
+            <form id="questions-form" onsubmit="event.preventDefault(); submitAnswers();">
+                <div id="questions-container"></div>
+                <button type="submit" id="submit-btn" class="btn-primary mt-1" style="width: 100%;">Submit Answers</button>
+            </form>
+        </div>
+
+        <!-- Log Panel -->
+        <div class="section" style="margin-bottom: 0;">
+            <div class="section-title">Event Logs</div>
+            <div id="log-console" class="console">
+                <div class="log-line"><span class="log-time">[System]</span> Welcome to go-elicit demo. Enter a session ID above to start.</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let eventSource = null;
+        let currentRequestId = null;
+        let isConnected = false;
+
+        const sessionInput = document.getElementById("session-id");
+        const connectBtn = document.getElementById("connect-btn");
+        const statusDot = document.getElementById("status-dot");
+        const statusText = document.getElementById("status-text");
+        const agentSection = document.getElementById("agent-section");
+        const formSection = document.getElementById("form-section");
+        const questionsContainer = document.getElementById("questions-container");
+        const logConsole = document.getElementById("log-console");
+
+        function log(msg) {
+            const time = new Date().toLocaleTimeString();
+            const line = document.createElement("div");
+            line.className = "log-line";
+            line.innerHTML = `<span class="log-time">[${time}]</span> ${msg}`;
+            logConsole.appendChild(line);
+            logConsole.scrollTop = logConsole.scrollHeight;
+        }
+
+        function toggleConnection() {
+            const sessionID = sessionInput.value.trim();
+            if (!sessionID) {
+                alert("Please enter a valid session ID");
+                return;
+            }
+
+            if (isConnected) {
+                // Disconnect
+                if (eventSource) {
+                    eventSource.close();
+                    eventSource = null;
+                }
+                isConnected = false;
+                connectBtn.textContent = "Connect";
+                connectBtn.className = "btn-primary";
+                statusDot.className = "status-dot";
+                statusText.textContent = "Disconnected";
+                sessionInput.disabled = false;
+                agentSection.classList.add("hidden");
+                formSection.classList.add("hidden");
+                log(`Disconnected from session: ${sessionID}`);
+            } else {
+                // Connect
+                log(`Connecting to session: ${sessionID}...`);
+                sessionInput.disabled = true;
+                connectBtn.disabled = true;
+
+                eventSource = new EventSource(`/events?session_id=${encodeURIComponent(sessionID)}`);
+
+                eventSource.onopen = function() {
+                    isConnected = true;
+                    connectBtn.disabled = false;
+                    connectBtn.textContent = "Disconnect";
+                    connectBtn.className = "btn-danger";
+                    statusDot.classList.add("connected");
+                    statusText.textContent = "Connected";
+                    agentSection.classList.remove("hidden");
+                    log(`SSE Connected to session ${sessionID}. Listening for requests...`);
+                };
+
+                eventSource.onmessage = function(e) {
+                    try {
+                        const req = JSON.parse(e.data);
+                        log(`Received elicitation request ${req.id} with ${req.questions.length} questions`);
+                        renderQuestions(req);
+                    } catch (err) {
+                        log(`Error parsing event data: ${err}`);
+                    }
+                };
+
+                eventSource.onerror = function() {
+                    log("Connection lost or server disconnected. Retrying...");
+                    // Reset UI slightly
+                    statusDot.className = "status-dot";
+                    statusText.textContent = "Connecting...";
+                };
+            }
+        }
+
+        function renderQuestions(req) {
+            currentRequestId = req.id;
+            questionsContainer.innerHTML = "";
+
+            req.questions.forEach((q, idx) => {
+                const block = document.createElement("div");
+                block.className = "question-block";
+                block.setAttribute("data-question", q.question);
+                block.setAttribute("data-type", q.type);
+
+                const title = document.createElement("div");
+                title.className = "question-text";
+                title.textContent = `${idx + 1}. ${q.question}`;
+                block.appendChild(title);
+
+                if (q.type === "single_select") {
+                    q.options.forEach(opt => {
+                        const item = document.createElement("label");
+                        item.className = "option-item";
+                        item.innerHTML = `<input type="radio" name="q-${idx}" value="${opt}" required> <span>${opt}</span>`;
+                        block.appendChild(item);
+                    });
+                } else if (q.type === "multi_select") {
+                    q.options.forEach(opt => {
+                        const item = document.createElement("label");
+                        item.className = "option-item";
+                        item.innerHTML = `<input type="checkbox" name="q-${idx}" value="${opt}"> <span>${opt}</span>`;
+                        block.appendChild(item);
+                    });
+                } else if (q.type === "rank_priorities") {
+                    const list = document.createElement("div");
+                    list.className = "priority-list";
+                    
+                    q.options.forEach(opt => {
+                        const item = document.createElement("div");
+                        item.className = "priority-item";
+                        item.setAttribute("data-value", opt);
+                        item.innerHTML = `
+                            <span class="priority-text">${opt}</span>
+                            <div class="priority-buttons">
+                                <button type="button" class="btn-arrow" onclick="movePriority(this, -1)">▲</button>
+                                <button type="button" class="btn-arrow" onclick="movePriority(this, 1)">▼</button>
+                            </div>
+                        `;
+                        list.appendChild(item);
+                    });
+                    block.appendChild(list);
+                }
+
+                questionsContainer.appendChild(block);
+            });
+
+            formSection.classList.remove("hidden");
+            formSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function movePriority(btn, direction) {
+            const item = btn.closest(".priority-item");
+            const parent = item.parentElement;
+            if (direction === -1) {
+                const prev = item.previousElementSibling;
+                if (prev) {
+                    parent.insertBefore(item, prev);
+                }
+            } else {
+                const next = item.nextElementSibling;
+                if (next) {
+                    parent.insertBefore(next, item);
+                }
+            }
+        }
+
+        function triggerAgent() {
+            const sessionID = sessionInput.value.trim();
+            log(`Triggering mock agent for session: ${sessionID}...`);
+            
+            fetch("/trigger", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ session_id: sessionID })
+            })
+            .then(res => {
+                if (res.status === 202) {
+                    log("Agent triggered successfully. Waiting for request notifications...");
+                } else {
+                    log(`Agent trigger returned error status: ${res.status}`);
+                }
+            })
+            .catch(err => {
+                log(`Failed to trigger agent: ${err}`);
+            });
+        }
+
+        function submitAnswers() {
+            const answers = [];
+            const blocks = questionsContainer.querySelectorAll(".question-block");
+
+            blocks.forEach((block, idx) => {
+                const questionText = block.getAttribute("data-question");
+                const type = block.getAttribute("data-type");
+                let selected = [];
+
+                if (type === "single_select") {
+                    const checked = block.querySelector(`input[name="q-${idx}"]:checked`);
+                    if (checked) {
+                        selected.push(checked.value);
+                    }
+                } else if (type === "multi_select") {
+                    const checkboxes = block.querySelectorAll(`input[name="q-${idx}"]:checked`);
+                    checkboxes.forEach(cb => {
+                        selected.push(cb.value);
+                    });
+                } else if (type === "rank_priorities") {
+                    const items = block.querySelectorAll(".priority-item");
+                    items.forEach(item => {
+                        selected.push(item.getAttribute("data-value"));
+                    });
+                }
+
+                answers.push({
+                    question: questionText,
+                    selected: selected
+                });
+            });
+
+            log(`Submitting answers for request ${currentRequestId}...`);
+            
+            fetch("/resolve", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    id: currentRequestId,
+                    answers: answers
+                })
+            })
+            .then(res => {
+                if (res.ok) {
+                    log("Answers submitted successfully!");
+                    formSection.classList.add("hidden");
+                    questionsContainer.innerHTML = "";
+                    currentRequestId = null;
+                } else {
+                    res.json().then(data => {
+                        log(`Failed to submit: ${data.error || 'unknown error'}`);
+                    });
+                }
+            })
+            .catch(err => {
+                log(`Network error submitting answers: ${err}`);
+            });
+        }
+    </script>
+</body>
+</html>
